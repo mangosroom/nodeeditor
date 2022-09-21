@@ -37,13 +37,15 @@ add_subdirectory(external)
 
 
 # Find the QtWidgets library
-find_package(Qt6 QUIET
-  COMPONENTS
-   Core
-   Widgets
-   Gui
-   OpenGL
-)
+if (NOT CMAKE_TOOLCHAIN_FILE)
+  find_package(Qt6 QUIET
+    COMPONENTS
+    Core
+    Widgets
+    Gui
+    OpenGL
+  )
+endif()
 
 if (NOT Qt6_FOUND)
   find_package(Qt5 QUIET
