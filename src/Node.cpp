@@ -66,6 +66,21 @@ save() const
   return nodeJson;
 }
 
+json Node::ToJson() const
+{
+  json nodeJson;
+
+  nodeJson["id"] = _uid.toString().toStdString();
+
+  nodeJson["model"] = _nodeDataModel->ToJson();
+
+  json obj;
+  obj["x"] = _nodeGraphicsObject->pos().x();
+  obj["y"] = _nodeGraphicsObject->pos().y();
+
+  nodeJson["position"] = obj;
+  return nodeJson;
+}
 
 void
 Node::
@@ -79,6 +94,17 @@ restore(QJsonObject const& json)
   _nodeGraphicsObject->setPos(point);
 
   _nodeDataModel->restore(json["model"].toObject());
+}
+
+void Node::FromJson(json const& json)
+{
+  _uid = QUuid(QString::fromStdString(json["id"].get<std::string>()));
+
+  QPointF  point( json["position"]["x"].get<double>(),json["position"]["y"].get<double>());
+
+  _nodeGraphicsObject->setPos(point);
+
+  _nodeDataModel->FromJson(json["model"]);
 }
 
 

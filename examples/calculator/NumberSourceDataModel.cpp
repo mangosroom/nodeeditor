@@ -25,6 +25,17 @@ save() const
   return modelJson;
 }
 
+json NumberSourceDataModel::ToJson() const
+{
+  json model_json = NodeDataModel::ToJson();
+  if (_number)
+  {
+    model_json["number"] = _number->number();
+  }
+
+  return model_json;
+}
+
 
 void
 NumberSourceDataModel::
@@ -44,6 +55,16 @@ restore(QJsonObject const &p)
       _lineEdit->setText(strNum);
     }
   }
+}
+
+void NumberSourceDataModel::FromJson(json const& p)
+{
+   double number = p["number"].get<double>();
+   if(!std::isnan(number))
+   {
+      _number = std::make_shared<DecimalData>(number);
+      _lineEdit->setText(QString::fromStdString(std::to_string(number)));
+   }
 }
 
 

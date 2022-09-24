@@ -15,6 +15,12 @@ save() const
   return modelJson;
 }
 
+json ModuloModel::ToJson() const
+{
+  json model_json;
+  model_json["name"] = name().toStdString();
+  return model_json;
+}
 
 unsigned int
 ModuloModel::

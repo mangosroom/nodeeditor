@@ -64,6 +64,14 @@ public:
     return modelJson;
   }
 
+  json ToJson() const override
+  {
+    json model_json;
+    model_json["name"] = name().toStdString();
+
+    return model_json;
+  }
+
 public:
 
   unsigned int

@@ -24,6 +24,13 @@ save() const
   return modelJson;
 }
 
+json NodeDataModel::ToJson() const
+{
+   json model_json;
+   model_json["name"] = name().toStdString();
+   return model_json;
+}
+
 
 NodeStyle const&
 NodeDataModel::

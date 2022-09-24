@@ -180,6 +180,49 @@ restoreConnection(QJsonObject const &connectionJson)
 }
 
 
+std::shared_ptr<Connection>
+FlowScene::
+restoreConnection(json const &connection_json)
+{
+  QUuid nodeInId  = QUuid(QString::fromStdString(connection_json["in_id"].get<std::string>()));
+  QUuid nodeOutId = QUuid(QString::fromStdString(connection_json["out_id"].get<std::string>()));
+
+  PortIndex portIndexIn  = connection_json["in_index"].get<PortIndex>();
+  PortIndex portIndexOut = connection_json["out_index"].get<PortIndex>();
+
+  auto nodeIn  = _nodes[nodeInId].get();
+  auto nodeOut = _nodes[nodeOutId].get();
+
+  auto getConverter = [&]()
+  {
+    if (connection_json.contains("converter"))
+    {
+      json converterJson = connection_json["converter"];
+
+      NodeDataType inType { QString::fromStdString(converterJson["in"]["id"].get<std::string>()),
+                            QString::fromStdString(converterJson["in"]["name"].get<std::string>())};
+
+      NodeDataType outType{ QString::fromStdString(converterJson["out"]["id"].get<std::string>()),
+                            QString::fromStdString(converterJson["out"]["name"].get<std::string>())};
+
+      auto converter  =
+        registry().getTypeConverter(outType, inType);
+
+      if (converter)
+        return converter;
+    }
+
+    return TypeConverter{};
+  };
+
+  std::shared_ptr<Connection> connection =
+    createConnection(*nodeIn, portIndexIn,
+                     *nodeOut, portIndexOut,
+                     getConverter());
+
+  return connection;
+}
+
 void
 FlowScene::
 deleteConnection(Connection const& connection)
@@ -227,6 +270,30 @@ restoreNode(QJsonObject const& nodeJson)
   node->setGraphicsObject(std::move(ngo));
 
   node->restore(nodeJson);
+
+  auto nodePtr = node.get();
+  _nodes[node->id()] = std::move(node);
+
+  nodePlaced(*nodePtr);
+  nodeCreated(*nodePtr);
+  return *nodePtr;
+}
+
+Node& FlowScene::RestoreNode(json const& node_json)
+{
+  std::string modelName = node_json["model"]["name"].get<std::string>();
+
+  auto dataModel = registry().create(QString::fromStdString(modelName));
+
+  if (!dataModel)
+    throw std::logic_error(std::string("No registered model with name ") +
+                           modelName);
+
+  auto node = detail::make_unique<Node>(std::move(dataModel));
+  auto ngo  = detail::make_unique<NodeGraphicsObject>(*this, *node);
+  node->setGraphicsObject(std::move(ngo));
+
+  node->FromJson(node_json);
 
   auto nodePtr = node.get();
   _nodes[node->id()] = std::move(node);
@@ -491,7 +558,7 @@ save() const
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly))
     {
-      file.write(saveToMemory());
+      file.write(GetFlowConfig().dump().c_str());
     }
   }
 }
@@ -519,7 +586,11 @@ load()
 
   QByteArray wholeFile = file.readAll();
 
-  loadFromMemory(wholeFile);
+  json config = json::parse(wholeFile.toStdString());
+
+  LoadFlowConfigFromJson(config);
+
+  //loadFromMemory(wholeFile);
 }
 
 
@@ -558,6 +629,35 @@ saveToMemory() const
   return document.toJson();
 }
 
+json FlowScene::GetFlowConfig() const
+{
+  json flow_json;
+
+  //nodes
+  for (auto const & pair : _nodes)
+  {
+    auto const &node = pair.second;
+    auto const &node_json = node->ToJson();
+    if (!node_json.empty())
+    {
+      flow_json["nodes"].push_back(node_json);
+    }
+  }
+
+  //connection
+  for (auto const & pair : _connections)
+  {
+    auto const &connection = pair.second;
+    auto const &connection_json = connection->ToJson();
+    if (!connection_json.empty())
+    {
+        flow_json["connections"].push_back(connection_json);
+    }
+  }
+
+   return flow_json;
+}
+
 
 void
 FlowScene::
@@ -580,6 +680,24 @@ loadFromMemory(const QByteArray& data)
   }
 }
 
+void FlowScene::LoadFlowConfigFromJson(const json& config)
+{
+    if(config.contains("nodes"))
+    {
+      for(const auto& node: config["nodes"])
+      {
+          RestoreNode(node);
+      }
+    }
+
+    if(config.contains("connections"))
+    {
+      for(const auto& connection: config["connections"])
+      {
+         restoreConnection(connection);
+      }
+    }
+}
 
 void
 FlowScene::

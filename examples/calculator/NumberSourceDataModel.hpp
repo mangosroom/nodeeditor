@@ -49,9 +49,12 @@ public:
   QJsonObject
   save() const override;
 
+  json ToJson() const override;
+
   void
   restore(QJsonObject const &p) override;
 
+  void FromJson(json const &p) override;
 public:
 
   unsigned int

@@ -72,6 +72,7 @@ public:
   QJsonObject
   save() const override;
 
+  json ToJson() const override;
 public:
 
   unsigned int

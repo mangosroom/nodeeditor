@@ -122,6 +122,42 @@ save() const
   return connectionJson;
 }
 
+json Connection::ToJson() const
+{
+  json connectionJson;
+
+  if (_inNode && _outNode)
+  {
+    connectionJson["in_id"] = _inNode->id().toString().toStdString();
+    connectionJson["in_index"] = _inPortIndex;
+
+    connectionJson["out_id"] = _outNode->id().toString().toStdString();
+    connectionJson["out_index"] = _outPortIndex;
+
+    if (_converter)
+    {
+      auto getTypeJson = [this](PortType type)
+      {
+        json typeJson;
+        NodeDataType nodeType = this->dataType(type);
+        typeJson["id"] = nodeType.id.toStdString();
+        typeJson["name"] = nodeType.name.toStdString();
+
+        return typeJson;
+      };
+
+      json converterTypeJson;
+
+      converterTypeJson["in"] = getTypeJson(PortType::In);
+      converterTypeJson["out"] = getTypeJson(PortType::Out);
+
+      connectionJson["converter"] = converterTypeJson;
+    }
+  }
+
+  return connectionJson;
+}
+
 
 QUuid
 Connection::

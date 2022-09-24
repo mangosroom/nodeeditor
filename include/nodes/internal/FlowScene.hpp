@@ -54,11 +54,15 @@ public:
 
   std::shared_ptr<Connection> restoreConnection(QJsonObject const &connectionJson);
 
+  std::shared_ptr<Connection> restoreConnection(json const &connection_json);
+
   void deleteConnection(Connection const& connection);
 
   Node&createNode(std::unique_ptr<NodeDataModel> && dataModel);
 
   Node&restoreNode(QJsonObject const& nodeJson);
+
+  Node& RestoreNode(json const& node_json);
 
   void removeNode(Node& node);
 
@@ -98,7 +102,11 @@ public:
 
   QByteArray saveToMemory() const;
 
+  json GetFlowConfig() const;
+
   void loadFromMemory(const QByteArray& data);
+
+  void LoadFlowConfigFromJson(const json& config);
 
 Q_SIGNALS:
 
