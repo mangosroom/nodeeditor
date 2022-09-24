@@ -55,6 +55,10 @@ main(int argc, char* argv[])
 {
   QApplication app(argc, argv);
 
+#if __APPLE__
+  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+#endif
+
   setStyle();
 
   FlowScene scene(registerDataModels());

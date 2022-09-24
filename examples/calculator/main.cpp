@@ -91,11 +91,16 @@ main(int argc, char *argv[])
 
   setStyle();
 
+#if __APPLE__
+  QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar);
+#endif
+
   QWidget mainWidget;
 
   auto menuBar    = new QMenuBar();
   auto saveAction = menuBar->addAction("Save..");
   auto loadAction = menuBar->addAction("Load..");
+  menuBar->setNativeMenuBar(false);
 
   QVBoxLayout *l = new QVBoxLayout(&mainWidget);
 
