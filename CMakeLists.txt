@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.8)
 
 project(NodeEditor CXX)
 
+# nlohmann_json
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/nlohmann_json)
+
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 set(OpenGL_GL_PREFERENCE LEGACY)
