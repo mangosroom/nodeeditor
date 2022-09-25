@@ -103,6 +103,7 @@ set(CPP_SOURCE_FILES
 # If we want to give the option to build a static library,
 # set BUILD_SHARED_LIBS option to OFF
 add_library(nodes
+  STATIC 
   ${CPP_SOURCE_FILES}
   ${RESOURCES}
 )
