@@ -40,7 +40,7 @@ add_subdirectory(external)
 
 
 # Find the QtWidgets library
-if (NOT CMAKE_TOOLCHAIN_FILE)
+if (NOT CMAKE_TOOLCHAIN_FILE AND False)
   find_package(Qt6 QUIET
     COMPONENTS
     Core
